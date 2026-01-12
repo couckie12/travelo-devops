@@ -1,0 +1,40 @@
+package com.example.travelo_backend.config;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+import com.example.travelo_backend.model.Flight;
+import com.example.travelo_backend.model.Seat;
+import com.example.travelo_backend.repository.FlightRepository;
+import com.example.travelo_backend.repository.SeatRepository;
+
+@Configuration
+public class DataLoader {
+
+    @Bean
+    CommandLineRunner loadData(FlightRepository flightRepo, SeatRepository seatRepo) {
+        return args -> {
+            Flight flight = new Flight();
+            flight.setDepartureCity("CASA");
+            flight.setArrivalCity("PARIS");
+            flight.setDate(LocalDate.of(2026, 1, 20));
+            flight.setCompany("Air France");
+            flight.setPrice(new BigDecimal("1200"));
+
+            flightRepo.save(flight);
+
+            Seat seat = new Seat();
+            seat.setIdFlight(flight.getIdFlight());
+            seat.setA1("free");
+            seat.setA2("free");
+            seat.setB1("free");
+
+            seatRepo.save(seat);
+        };
+    }
+}

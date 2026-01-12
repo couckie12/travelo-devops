@@ -1,0 +1,9 @@
+@RestController
+@RequestMapping("/api/passengers")
+public class PassengerController {
+
+    @GetMapping
+    public List<Passenger> getAll() {
+        return passengerRepository.findAll();
+    }
+}

@@ -1,0 +1,68 @@
+
+package com.example.travelo_backend.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.example.travelo_backend.model.Passenger;;
+import com.example.travelo_backend.model.Reservation;
+import com.example.travelo_backend.model.Seat;
+import com.example.travelo_backend.repository.PassengerRepository;
+import com.example.travelo_backend.repository.ReservationRepository;
+import com.example.travelo_backend.repository.SeatRepository;
+
+
+@Service
+public class ReservationService {
+
+    @Autowired
+    private SeatRepository seatRepository;
+
+    @Autowired
+    private PassengerRepository passengerRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    public Reservation reserveSeat(Long flightId, String seatName, Passenger passenger) {
+
+        Seat seat = seatRepository.findByFlight_IdFlight(flightId)
+                .orElseThrow(() -> new RuntimeException("Seats not found"));
+
+        String currentValue = getSeatValue(seat, seatName);
+        if (!"free".equalsIgnoreCase(currentValue)) {
+            throw new RuntimeException("Seat already reserved");
+        }
+
+        setSeatValue(seat, seatName, "reserved");
+        seatRepository.save(seat);
+
+        Passenger savedPassenger = passengerRepository.save(passenger);
+
+        Reservation reservation = new Reservation();
+        reservation.setSeatName(seatName);
+        reservation.setPassenger(savedPassenger);
+        reservation.setFlight(seat.getFlight());
+
+        return reservationRepository.save(reservation);
+    }
+
+    private String getSeatValue(Seat seat, String seatName) {
+        try {
+            return (String) Seat.class
+                    .getMethod("get" + seatName.toUpperCase())
+                    .invoke(seat);
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid seat");
+        }
+    }
+
+    private void setSeatValue(Seat seat, String seatName, String value) {
+        try {
+            Seat.class
+                .getMethod("set" + seatName.toUpperCase(), String.class)
+                .invoke(seat, value);
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid seat");
+        }
+    }
+}

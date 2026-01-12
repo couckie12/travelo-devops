@@ -1,0 +1,37 @@
+version: "3.9"
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-travelo
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: travelo_db
+      MYSQL_USER: travelo
+      MYSQL_PASSWORD: travelo123
+    volumes:
+      - mysql_travelo_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: ikramhakimi/travelo-backend:1.0
+    container_name: travelo-backend
+    ports:
+      - "8081:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/travelo_db
+      SPRING_DATASOURCE_USERNAME: travelo
+      SPRING_DATASOURCE_PASSWORD: travelo123
+
+volumes:
+  mysql_travelo_data:
