@@ -1,0 +1,28 @@
+name: CI Pipeline - Travelo DevOps
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build backend with Maven
+        working-directory: backend
+        run: mvn clean package -DskipTests
+
+      - name: Build Docker image
+        run: docker build -t travelo-backend:latest ./backend
